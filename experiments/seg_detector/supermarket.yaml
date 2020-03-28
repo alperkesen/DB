@@ -61,7 +61,7 @@ define:
                 class: DataLoader
                 dataset: ^validate_data
                 batch_size: 1
-                num_workers: 16
+                num_workers: 4
                 collect_fn:
                     class: ICDARCollectFN
         visualize: false
