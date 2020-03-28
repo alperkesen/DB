@@ -40,7 +40,7 @@ define:
         model_saver: 
             class: ModelSaver
             dir_path: model
-            save_interval: 1
+            save_interval: 38
             signal_path: save
         scheduler: 
             class: OptimizerScheduler
