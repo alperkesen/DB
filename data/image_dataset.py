@@ -37,10 +37,10 @@ class ImageDataset(data.Dataset, Configurable):
             with open(self.data_list[i], 'r') as fid:
                 image_list = fid.readlines()
             if self.is_training:
-                image_path=[self.data_dir[i]+'/train_img/'+timg.strip() for timg in image_list]
+                image_path=[self.data_dir[i]+'/train_img/'+timg.strip() + '.jpg' for timg in image_list]
                 gt_path=[self.data_dir[i]+'/train_gt/'+timg.strip()+'.txt' for timg in image_list]
             else:
-                image_path=[self.data_dir[i]+'/test_img/'+timg.strip() for timg in image_list]
+                image_path=[self.data_dir[i]+'/test_img/'+timg.strip() + '.jpg' for timg in image_list]
                 print(self.data_dir[i])
                 if 'TD500' in self.data_list[i] or 'total_text' in self.data_list[i]:
                     gt_path=[self.data_dir[i]+'/test_gt/'+timg.strip()+'.txt' for timg in image_list]
