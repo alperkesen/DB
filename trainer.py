@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 import torch
 from tqdm import tqdm
@@ -50,6 +51,8 @@ class Trainer:
         if self.experiment.validation:
             validation_loaders = self.experiment.validation.data_loaders
 
+        validation_data_loader = self.experiment.validation.data_loaders["icdar2015"]
+
         self.steps = 0
         if self.experiment.train.checkpoint:
             self.experiment.train.checkpoint.restore_model(
@@ -68,6 +71,9 @@ class Trainer:
             self.logger.info('Training epoch ' + str(epoch))
             self.logger.epoch(epoch)
             self.total = len(train_data_loader)
+            num_train = len(train_data_loader)
+
+            train_loss = 0
 
             for batch in train_data_loader:
                 self.update_learning_rate(optimizer, epoch, self.steps)
@@ -82,8 +88,10 @@ class Trainer:
                 if self.logger.verbose:
                     torch.cuda.synchronize()
 
-                self.train_step(model, optimizer, batch,
-                                epoch=epoch, step=self.steps)
+                batch_loss = self.train_step(model, optimizer, batch,
+                                             epoch=epoch, step=self.steps)
+                train_loss += batch_loss
+
                 if self.logger.verbose:
                     torch.cuda.synchronize()
                 self.logger.report_time('Forwarding ')
@@ -94,7 +102,21 @@ class Trainer:
                 self.steps += 1
                 self.logger.report_eta(self.steps, self.total, epoch)
 
+            train_loss /= num_train
+            self.logger.info("Epoch {}: Train Loss: {}".format(epoch, train_loss))
+
+            # Validation check
+
+            val_loss, metrics = self.get_validation_analysis(validation_data_loader, model)
+
+            self.logger.info("Epoch {}: Validation Loss: {}".format(epoch, val_loss))
+            self.logger.info("Epoch {}: Accuracy Analysis:".format(epoch))
+
+            for key, metric in metrics.items():
+                self.logger.info('%s : %f (%d)' % (key, metric.avg, metric.count))
+
             epoch += 1
+
             if epoch > self.experiment.train.epochs:
                 self.model_saver.save_checkpoint(model, 'final')
                 if self.experiment.validation:
@@ -140,6 +162,8 @@ class Trainer:
 
             self.logger.report_time('Logging')
 
+        return loss
+
     def validate(self, validation_loaders, model, epoch, step):
         all_matircs = {}
         model.eval()
@@ -184,3 +208,73 @@ class Trainer:
 
     def to_np(self, x):
         return x.cpu().data.numpy()
+
+    def get_validation_analysis(self, validation_data_loader, model, visualize=False):
+        num_val = len(validation_data_loader)
+        val_loss = 0
+        raw_metrics = list()
+
+        for batch in validation_data_loader:
+            results = model.forward(batch, training=True)
+
+            if len(results) == 2:
+                l, pred = results
+                metrics = {}
+            elif len(results) == 3:
+                l, pred, metrics = results
+
+            if isinstance(l, dict):
+                line = []
+                loss = torch.tensor(0.).cuda()
+                for key, l_val in l.items():
+                    loss += l_val.mean()
+                    line.append('loss_{0}:{1:.4f}'.format(key, l_val.mean()))
+            else:
+                loss = l.mean()
+
+            val_loss += loss
+
+            # Precision, Recall, F1-Score Analysis
+
+            output = self.structure.representer.represent(
+                batch, pred, is_output_polygon=self.args['polygon'])
+
+            if not os.path.isdir(self.args['result_dir']):
+                os.mkdir(self.args['result_dir'])
+
+            self.format_output(batch, output)
+            raw_metric = self.structure.measurer.validate_measure(
+                batch, output, is_output_polygon=self.args['polygon'],
+                box_thresh=self.args['box_thresh'])
+            raw_metrics.append(raw_metric)
+
+        val_loss /= num_val
+        metrics = self.structure.measurer.gather_measure(raw_metrics, self.logger)
+
+        return val_loss, metrics
+
+    def format_output(self, batch, output):
+        batch_boxes, batch_scores = output
+        for index in range(batch['image'].size(0)):
+            original_shape = batch['shape'][index]
+            filename = batch['filename'][index]
+            result_file_name = 'res_' + filename.split('/')[-1].split('.')[0] + '.txt'
+            result_file_path = os.path.join(self.args['result_dir'], result_file_name)
+            boxes = batch_boxes[index]
+            scores = batch_scores[index]
+            if self.args['polygon']:
+                with open(result_file_path, 'wt') as res:
+                    for i, box in enumerate(boxes):
+                        box = np.array(box).reshape(-1).tolist()
+                        result = ",".join([str(int(x)) for x in box])
+                        score = scores[i]
+                        res.write(result + ',' + str(score) + "\n")
+            else:
+                with open(result_file_path, 'wt') as res:
+                    for i in range(boxes.shape[0]):
+                        score = scores[i]
+                        if score < self.args['box_thresh']:
+                            continue
+                        box = boxes[i,:,:].reshape(-1).tolist()
+                        result = ",".join([str(int(x)) for x in box])
+                        res.write(result + ',' + str(score) + "\n")
