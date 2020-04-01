@@ -65,13 +65,13 @@ define:
                 collect_fn:
                     class: ICDARCollectFN
         visualize: false
-        interval: 4500
+        interval: 38
         exempt: 1
 
     logger:
         class: Logger
         verbose: true
         level: info
-        log_interval: 450
+        log_interval: 38
 
     evaluation: *validate
