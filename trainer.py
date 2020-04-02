@@ -107,9 +107,8 @@ class Trainer:
 
             # Validation check
 
-            val_loss, metrics = self.get_validation_analysis(validation_data_loader, model)
+            metrics = self.get_validation_analysis(validation_data_loader, model)
 
-            self.logger.info("Epoch {}: Validation Loss: {}".format(epoch, val_loss))
             self.logger.info("Epoch {}: Accuracy Analysis:".format(epoch))
 
             for key, metric in metrics.items():
@@ -210,29 +209,10 @@ class Trainer:
         return x.cpu().data.numpy()
 
     def get_validation_analysis(self, validation_data_loader, model, visualize=False):
-        num_val = len(validation_data_loader)
-        val_loss = 0
         raw_metrics = list()
 
         for batch in validation_data_loader:
-            results = model.forward(batch, training=True)
-
-            if len(results) == 2:
-                l, pred = results
-                metrics = {}
-            elif len(results) == 3:
-                l, pred, metrics = results
-
-            if isinstance(l, dict):
-                line = []
-                loss = torch.tensor(0.).cuda()
-                for key, l_val in l.items():
-                    loss += l_val.mean()
-                    line.append('loss_{0}:{1:.4f}'.format(key, l_val.mean()))
-            else:
-                loss = l.mean()
-
-            val_loss += loss
+            pred = model.forward(batch, training=False)
 
             # Precision, Recall, F1-Score Analysis
 
@@ -248,10 +228,9 @@ class Trainer:
                 box_thresh=self.args['box_thresh'])
             raw_metrics.append(raw_metric)
 
-        val_loss /= num_val
         metrics = self.structure.measurer.gather_measure(raw_metrics, self.logger)
 
-        return val_loss, metrics
+        return metrics
 
     def format_output(self, batch, output):
         batch_boxes, batch_scores = output
