@@ -68,6 +68,8 @@ class Trainer:
             self.logger.info('Training epoch ' + str(epoch))
             self.logger.epoch(epoch)
             self.total = len(train_data_loader)
+            train_loss = 0
+            batch_no = 1
 
             for batch in train_data_loader:
                 self.update_learning_rate(optimizer, epoch, self.steps)
@@ -82,8 +84,14 @@ class Trainer:
                 if self.logger.verbose:
                     torch.cuda.synchronize()
 
-                self.train_step(model, optimizer, batch,
-                                epoch=epoch, step=self.steps)
+                batch_loss += self.train_step(model, optimizer, batch,
+                                              epoch=epoch, step=self.steps)
+
+                self.logger.info("Epoch {}, batch {}, batch loss: {}".format(
+                    epoch, batch_no, batch_loss))
+
+                train_loss += batch_loss
+
                 if self.logger.verbose:
                     torch.cuda.synchronize()
                 self.logger.report_time('Forwarding ')
@@ -92,9 +100,21 @@ class Trainer:
                     model, epoch, self.steps, self.logger)
 
                 self.steps += 1
+                batch_no += 1
                 self.logger.report_eta(self.steps, self.total, epoch)
 
+            train_loss /= self.total
+
+            self.logger.info("Epoch {}, train loss: {}".format(epoch, train_loss))
+            self.logger.info("Saving model...")
+            self.model_saver.save_checkpoint(model, 'epoch{}'.format(epoch))
+
+            if self.experiment.validation:
+                self.logger.info("Epoch {}, Validation Analysis".format(epoch))
+                self.validate(validation_loaders, model, epoch, self.steps)
+
             epoch += 1
+
             if epoch > self.experiment.train.epochs:
                 self.model_saver.save_checkpoint(model, 'final')
                 if self.experiment.validation:
@@ -139,6 +159,8 @@ class Trainer:
                 self.logger.info('%s: %6f' % (name, metric.mean()))
 
             self.logger.report_time('Logging')
+
+        return loss
 
     def validate(self, validation_loaders, model, epoch, step):
         all_matircs = {}
