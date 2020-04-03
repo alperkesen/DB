@@ -84,8 +84,8 @@ class Trainer:
                 if self.logger.verbose:
                     torch.cuda.synchronize()
 
-                batch_loss += self.train_step(model, optimizer, batch,
-                                              epoch=epoch, step=self.steps)
+                batch_loss = self.train_step(model, optimizer, batch,
+                                             epoch=epoch, step=self.steps)
 
                 self.logger.info("Epoch {}, batch {}, batch loss: {}".format(
                     epoch, batch_no, batch_loss))
