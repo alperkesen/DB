@@ -59,7 +59,7 @@ define:
         data_loader: 
             class: DataLoader
             dataset: ^validate_data
-            batch_size: 1
+            batch_size: 4
             num_workers: 4
         checkpoint: 
             class: Checkpoint
