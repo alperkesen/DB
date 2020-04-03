@@ -71,7 +71,7 @@ class Trainer:
 
             train_loss = 0
             batch_no = 1
-
+            """
             for batch in train_data_loader:
                 self.update_learning_rate(optimizer, epoch, self.steps)
 
@@ -99,14 +99,14 @@ class Trainer:
                 self.steps += 1
                 batch_no += 1
                 self.logger.report_eta(self.steps, self.total, epoch)
-
+            """
             train_loss /= self.total
-            self.logger.info("Epoch {}, train loss: {}", epoch, train_loss)
-
+            self.logger.info("Epoch {}, train loss: {}".format(epoch, train_loss))
+            self.logger.info("Saving model...")
             self.model_saver.save_checkpoint(model, 'epoch{}'.format(epoch))
-
-            val_loss = self.get_val_loss(validation_loader, model)
-            self.logger.info("Epoch {}, validation loss: {}", epoch, val_loss)
+            self.logger.info("Getting validation loss...")
+            val_loss = self.get_val_loss(model, validation_loader, epoch)
+            self.logger.info("Epoch {}, validation loss: {}".format(epoch, val_loss))
 
             epoch += 1
             if epoch > self.experiment.train.epochs:
@@ -196,40 +196,40 @@ class Trainer:
             raw_metrics, self.logger)
         return metrics, vis_images
 
-        def get_val_loss(self, model, validation_loader, epoch):
-            val_loss = 0
-            batch_no = 1
-            num_val = len(validation_loader)
+    def get_val_loss(self, model, validation_loader, epoch):
+        val_loss = 0
+        batch_no = 1
+        num_val = len(validation_loader)
             
-            for batch in validation_loader:
-                results = model.forward(batch, training=True)
+        for batch in validation_loader:
+            results = model.forward(batch, training=True)
 
-                if len(results) == 2:
-                    l, pred = results
-                    metrics = {}
-                elif len(results) == 3:
-                    l, pred, metrics = results
+            if len(results) == 2:
+                l, pred = results
+                metrics = {}
+            elif len(results) == 3:
+                l, pred, metrics = results
 
-                    if isinstance(l, dict):
-                        line = []
-                        loss = torch.tensor(0.).cuda()
-                        for key, l_val in l.items():
-                            loss += l_val.mean()
-                            line.append('loss_{0}:{1:.4f}'.format(key, l_val.mean()))
-                    else:
-                        loss = l.mean()
+                if isinstance(l, dict):
+                    line = []
+                    loss = torch.tensor(0.).cuda()
+                    for key, l_val in l.items():
+                        loss += l_val.mean()
+                        line.append('loss_{0}:{1:.4f}'.format(key, l_val.mean()))
+                else:
+                    loss = l.mean()
 
-                batch_loss = loss
+            batch_loss = loss
 
-                self.logger.info("Val, Epoch {}, batch {}, batch loss: {}".format(
-                    epoch, batch_no, batch_loss))
+            self.logger.info("Val, Epoch {}, batch {}, batch loss: {}".format(
+                epoch, batch_no, batch_loss))
 
-                val_loss += batch_loss
-                batch_no += 1
+            val_loss += batch_loss
+            batch_no += 1
 
-            val_loss /= num_val
+        val_loss /= num_val
 
-            return val_loss
+        return val_loss
 
     def to_np(self, x):
         return x.cpu().data.numpy()
