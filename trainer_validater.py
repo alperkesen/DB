@@ -91,6 +91,7 @@ class Trainer:
                 self.logger.report_time('Forwarding ')
 
                 self.steps += 1
+                batch_no += 1
                 self.logger.report_eta(self.steps, self.total, epoch)
 
             train_loss /= self.total
