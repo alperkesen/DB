@@ -66,4 +66,10 @@ define:
         interval: 76
         exempt: 1
 
+    logger:
+        class: Logger
+        verbose: true
+        level: info
+        log_interval: 76
+
     evaluation: *validate
