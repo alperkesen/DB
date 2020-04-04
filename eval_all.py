@@ -168,7 +168,7 @@ class Eval:
 
         for model_path in model_paths:
             self.logger.info("Path is {}".format(model_path))
-            self.resume(os.path.join(dir_path, model_path))
+            self.resume(model, os.path.join(dir_path, model_path))
             all_matircs = {}
             model.eval()
             vis_images = dict()
