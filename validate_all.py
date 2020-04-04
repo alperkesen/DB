@@ -80,8 +80,9 @@ class Trainer:
                 if self.logger.verbose:
                     torch.cuda.synchronize()
 
-                batch_loss = self.val_step(model, optimizer, batch,
-                                           epoch=epoch, step=self.steps)
+                with torch.no_grad():
+                    batch_loss = self.val_step(model, optimizer, batch,
+                                               epoch=epoch, step=self.steps)
 
                 self.logger.info("(validate) Epoch is [{}/{}], mini batch is [{}/{}], batch_loss is {:.8f}".format(
                 epoch, self.experiment.train.epochs, batch_no, self.total, batch_loss))
