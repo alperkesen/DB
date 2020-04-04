@@ -112,8 +112,6 @@ class Trainer:
 
             if epoch > self.experiment.train.epochs:
                 self.model_saver.save_checkpoint(model, 'final')
-                if self.experiment.validation:
-                    self.validate(validation_loaders, model, epoch, self.steps)
                 self.logger.info('Training done')
                 break
             iter_delta = 0
