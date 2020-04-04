@@ -68,6 +68,7 @@ class Trainer:
             self.logger.info('Training epoch ' + str(epoch))
             self.logger.epoch(epoch)
             self.total = len(train_data_loader)
+
             train_loss = 0
             batch_no = 1
 
@@ -87,8 +88,8 @@ class Trainer:
                 batch_loss = self.train_step(model, optimizer, batch,
                                              epoch=epoch, step=self.steps)
 
-                self.logger.info("Epoch {}, batch {}, batch loss: {}".format(
-                    epoch, batch_no, batch_loss))
+                self.logger.info("Epoch is [{}/{}], mini batch is [{}/{}], batch_loss is {:.8f}".format(
+                    epoch, self.experiment.train.epochs, batch_no, self.total, batch_loss))
 
                 train_loss += batch_loss
 
@@ -96,22 +97,15 @@ class Trainer:
                     torch.cuda.synchronize()
                 self.logger.report_time('Forwarding ')
 
-                self.model_saver.maybe_save_model(
-                    model, epoch, self.steps, self.logger)
-
                 self.steps += 1
-                batch_no += 1
                 self.logger.report_eta(self.steps, self.total, epoch)
 
             train_loss /= self.total
 
-            self.logger.info("Epoch {}, train loss: {}".format(epoch, train_loss))
-            self.logger.info("Saving model...")
-            self.model_saver.save_checkpoint(model, 'epoch{}'.format(epoch))
+            self.logger.info("train_loss is {:.8f} (Epoch {})".format(train_loss, epoch))
 
-            if self.experiment.validation:
-                self.logger.info("Epoch {}, Validation Analysis".format(epoch))
-                self.validate(validation_loaders, model, epoch, self.steps)
+            self.logger.info("Saving model...")
+            self.model_saver.save_checkpoint(model, 'dbnet_epoch{}'.format(epoch))
 
             epoch += 1
 
