@@ -52,10 +52,12 @@ class Trainer:
 
         self.steps = 0
 
-        model_paths = os.listdir(self.experiment.train.checkpoint.resume)
+        dir_path = self.experiment.train.checkpoint.resume
+        model_paths = os.listdir(dir_path)
 
         for model_path in model_paths:
-            self.experiment.train.checkpoint.resume = model_path
+            self.experiment.train.checkpoint.resume = os.path.join(
+                dir_path, model_path)
             self.experiment.train.checkpoint.restore_model(
                 model, self.device, self.logger)
             epoch, iter_delta = self.experiment.train.checkpoint.restore_counter()
