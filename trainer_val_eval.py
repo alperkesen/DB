@@ -105,12 +105,9 @@ class Trainer:
             self.logger.info("val loss is {:.8f} (Epoch {})".format(val_loss, epoch))
 
             self.logger.info("Evaluating...")
-            metrics = self.eval_model(validation_loaders, model)
 
             self.logger.info("Epoch {}: F1-Score Results".format(epoch))
-
-            for key, metric in metrics.items():
-                self.logger.info('%s : %f (%d)' % (key, metric.avg, metric.count))
+            os.system("CUDA_VISIBLE_DEVICES=0 python eval.py experiments/seg_detector/supermarket.yaml --resume pths/DB/db_epoch{} --polygon --box_thresh 0.5".format(epoch))
 
             epoch += 1
 
