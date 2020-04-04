@@ -5,7 +5,7 @@ import time
 import torch
 import yaml
 
-from validater import Trainer
+from validate_all import Trainer
 # tagged yaml objects
 from experiment import Structure, TrainSettings, ValidationSettings, Experiment
 from concern.log import Logger
