@@ -76,7 +76,13 @@ def main():
     experiment_args.update(cmd=args)
     experiment = Configurable.construct_class_from_config(experiment_args)
 
-    Eval(experiment, experiment_args, cmd=args, verbose=args['verbose']).eval(args['visualize'])
+    dir_path = args["resume"]
+    model_paths = sorted(os.listdir(dir_path))
+
+    for model_path in model_paths:
+        args["resume"] = os.path.join(dir_path, model_path)
+        print("Model is {}".format(model_path))
+        Eval(experiment, experiment_args, cmd=args, verbose=args['verbose']).eval(args['visualize'])
 
 
 class Eval:
@@ -162,40 +168,32 @@ class Eval:
     def eval(self, visualize=False):
         self.init_torch_tensor()
         model = self.init_model()
+        self.resume(model, self.model_path)
+        all_matircs = {}
+        model.eval()
+        vis_images = dict()
+        with torch.no_grad():
+            for _, data_loader in self.data_loaders.items():
+                raw_metrics = []
+                for i, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
+                    if self.args['test_speed']:
+                        time_cost = self.report_speed(model, batch, times=50)
+                        continue
+                    pred = model.forward(batch, training=False)
+                    output = self.structure.representer.represent(batch, pred, is_output_polygon=self.args['polygon']) 
+                    if not os.path.isdir(self.args['result_dir']):
+                        os.mkdir(self.args['result_dir'])
+                    self.format_output(batch, output)
+                    raw_metric = self.structure.measurer.validate_measure(batch, output, is_output_polygon=self.args['polygon'], box_thresh=self.args['box_thresh'])
+                    raw_metrics.append(raw_metric)
 
-        dir_path = self.model_path
-        model_paths = os.listdir(dir_path)
-
-        for model_path in model_paths:
-            self.logger.info("Path is {}".format(model_path))
-            self.resume(model, os.path.join(dir_path, model_path))
-            all_matircs = {}
-            model.eval()
-            vis_images = dict()
-            with torch.no_grad():
-                for _, data_loader in self.data_loaders.items():
-                    raw_metrics = []
-                    for i, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
-                        if self.args['test_speed']:
-                            time_cost = self.report_speed(model, batch, times=50)
-                            continue
-                        pred = model.forward(batch, training=False)
-                        output = self.structure.representer.represent(batch, pred, is_output_polygon=self.args['polygon']) 
-                        if not os.path.isdir(self.args['result_dir']):
-                            os.mkdir(self.args['result_dir'])
-                        self.format_output(batch, output)
-                        raw_metric = self.structure.measurer.validate_measure(batch, output, is_output_polygon=self.args['polygon'], box_thresh=self.args['box_thresh'])
-                        raw_metrics.append(raw_metric)
-
-                        if visualize and self.structure.visualizer:
-                            vis_image = self.structure.visualizer.visualize(batch, output, pred)
-                            self.logger.save_image_dict(vis_image)
-                            vis_images.update(vis_image)
-
-                    metrics = self.structure.measurer.gather_measure(raw_metrics, self.logger)
-                    self.logger.info("Model is {}".format(os.path.basename(model_path)))
-                    for key, metric in metrics.items():
-                        self.logger.info('%s : %f (%d)' % (key, metric.avg, metric.count))
+                    if visualize and self.structure.visualizer:
+                        vis_image = self.structure.visualizer.visualize(batch, output, pred)
+                        self.logger.save_image_dict(vis_image)
+                        vis_images.update(vis_image)
+                metrics = self.structure.measurer.gather_measure(raw_metrics, self.logger)
+                for key, metric in metrics.items():
+                    self.logger.info('%s : %f (%d)' % (key, metric.avg, metric.count))
 
 if __name__ == '__main__':
     main()
