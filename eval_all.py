@@ -195,5 +195,8 @@ class Eval:
                 for key, metric in metrics.items():
                     self.logger.info('%s : %f (%d)' % (key, metric.avg, metric.count))
 
+                self.logger.info("<eval>{},{}</eval>".format(
+                    self.model_path, metrics["fmeasure"]))
+
 if __name__ == '__main__':
     main()

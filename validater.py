@@ -89,6 +89,7 @@ class Trainer:
 
         val_loss /= self.total
         self.logger.info("val_loss is {:.8f} (Epoch {})".format(val_loss, epoch))
+        self.logger.info("<val>{},{:,8f}</val>".format(epoch, val_loss))
         self.logger.info('Validation done')
 
     def val_step(self, model, optimizer, batch, epoch, step, **kwards):

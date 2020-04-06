@@ -97,6 +97,7 @@ class Trainer:
             train_loss /= self.total
 
             self.logger.info("train_loss is {:.8f} (Epoch {})".format(train_loss, epoch))
+            self.logger.info("<train>{},{:,8f}</train>".format(epoch, train_loss))
 
             self.logger.info("Saving model...")
             self.model_saver.save_checkpoint(model, 'dbnet_epoch{}'.format(epoch))
@@ -104,6 +105,7 @@ class Trainer:
             self.logger.info("Validating...")
             val_loss = self.validate(validation_loaders, model, epoch)
             self.logger.info("val loss is {:.8f} (Epoch {})".format(val_loss, epoch))
+            self.logger.info("<val>{},{:,8f}</val>".format(epoch, val_loss))
 
             self.logger.info("Evaluating...")
 
