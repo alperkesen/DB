@@ -79,7 +79,7 @@ def main():
     dir_path = args["resume"]
     model_paths = sorted(os.listdir(dir_path))
 
-    for model_path in model_paths:
+    for model_path in sorted(model_paths):
         args["resume"] = os.path.join(dir_path, model_path)
         print("Model is {}".format(model_path))
         Eval(experiment, experiment_args, cmd=args, verbose=args['verbose']).eval(args['visualize'])

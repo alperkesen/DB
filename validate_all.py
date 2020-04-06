@@ -55,7 +55,7 @@ class Trainer:
         dir_path = self.experiment.train.checkpoint.resume
         model_paths = os.listdir(dir_path)
 
-        for model_path in model_paths:
+        for model_path in sorted(model_paths):
             self.experiment.train.checkpoint.resume = os.path.join(
                 dir_path, model_path)
             self.experiment.train.checkpoint.restore_model(
