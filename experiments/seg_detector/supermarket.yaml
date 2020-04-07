@@ -34,7 +34,7 @@ define:
             num_workers: 4
         checkpoint: 
             class: Checkpoint
-            start_epoch: 21
+            start_epoch: 41
             start_iter: 0
             resume: null
         model_saver: 
