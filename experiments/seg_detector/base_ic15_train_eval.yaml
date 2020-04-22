@@ -1,4 +1,4 @@
-:
+import:
     - 'experiments/base.yaml'
 package:
     - 'decoders.seg_detector_loss'
