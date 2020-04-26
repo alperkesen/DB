@@ -12,7 +12,7 @@ define:
     processes:
         - class: AugmentDetectionData
           augmenter_args:
-              - ['Fliplr', 0.5]
+              # - ['Fliplr', 0.5]
               - {'cls': 'Affine', 'rotate': [-10, 10]}
               - ['Resize', [0.5, 3.0]]
           only_resize: False
@@ -36,8 +36,8 @@ define:
     processes:
         - class: AugmentDetectionData
           augmenter_args:
-              - ['Resize', {'width': 1280, 'height': 736}]
-              # - ['Resize', {'width': 2048, 'height': 1152}]
+              # - ['Resize', {'width': 1280, 'height': 736}]
+              - ['Resize', {'width': 2048, 'height': 1152}]
           only_resize: True
           keep_ratio: False
         - class: MakeICDARData
