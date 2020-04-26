@@ -42,3 +42,7 @@ class ModelSaver(Configurable):
         else:
             c_name = '{}_epoch_{}_minibatch_{}'.format(name, epoch, step)
         return c_name
+
+    def save_optimizer(self, optimizer, name):
+        os.makedirs(self.dir_path, exist_ok=True)
+        torch.save(optimizer.state_dict(), os.path.join(self.dir_path, name))

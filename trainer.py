@@ -59,6 +59,7 @@ class Trainer:
             self.steps = epoch * self.total + iter_delta
 
         # Init start epoch and iter
+
         optimizer = self.experiment.train.scheduler.create_optimizer(
             model.parameters())
 
@@ -74,7 +75,7 @@ class Trainer:
             batch_no = 1
 
             for batch in train_data_loader:
-                self.update_learning_rate(optimizer, epoch, self.steps)
+                # self.update_learning_rate(optimizer, epoch, self.steps)
 
                 self.logger.report_time("Data loading")
 
@@ -117,6 +118,7 @@ class Trainer:
                 if self.experiment.validation:
                     self.validate(validation_loaders, model, epoch, self.steps)
                 self.logger.info('Training done')
+                self.model_saver.save_optimizer(optimizer, 'optimizer')
                 break
             iter_delta = 0
 
