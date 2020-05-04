@@ -12,7 +12,7 @@ define:
     processes:
         - class: AugmentDetectionData
           augmenter_args:
-	      - ['GammaContrast', [0.5, 2.0]]
+              - ['GammaContrast', [0.5, 2.0]]
               - ['Fliplr', 0.5]
               - {'cls': 'Affine', 'rotate': [-10, 10]}
               - ['Resize', [0.5, 3.0]]
