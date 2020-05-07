@@ -37,8 +37,8 @@ define:
         - class: AugmentDetectionData
           augmenter_args:
               # - ['Resize', {'width': 1280, 'height': 736}]
-              - ['Resize', {'width': 2048, 'height': 1152}]
-              #  - ['Resize', {'width': 2800, 'height': 1582}]
+              # - ['Resize', {'width': 2048, 'height': 1152}]
+              # - ['Resize', {'width': 2800, 'height': 1582}]
           only_resize: True
           keep_ratio: False
         - class: MakeICDARData
