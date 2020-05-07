@@ -43,6 +43,6 @@ define:
           keep_ratio: True
         - class: MakeICDARData
         - class: MakeSegDetectionData
-	- class: MakeBorderMap
+        - class: MakeBorderMap
         - class: NormalizeImage
 
