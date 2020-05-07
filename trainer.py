@@ -75,7 +75,7 @@ class Trainer:
             batch_no = 1
 
             for batch in train_data_loader:
-                # self.update_learning_rate(optimizer, epoch, self.steps)
+                self.update_learning_rate(optimizer, epoch, self.steps)
 
                 self.logger.report_time("Data loading")
 
