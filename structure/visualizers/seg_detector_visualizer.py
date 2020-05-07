@@ -54,6 +54,9 @@ class SegDetectorVisualizer(Configurable):
         pred_canvas = image.copy().astype(np.uint8)
         pred_canvas = cv2.resize(pred_canvas, (original_shape[1], original_shape[0]))
 
+        if isinstance(pred, dict) and 'binary' in pred:
+            binary = self._visualize_heatmap(pred['binary'][index])
+
         if isinstance(pred, dict) and 'thresh' in pred:
             thresh = self._visualize_heatmap(pred['thresh'][index])
 
@@ -80,12 +83,14 @@ class SegDetectorVisualizer(Configurable):
                 return {
                     filename + '_output': pred_canvas,
                     filename + '_thresh': thresh,
-                    # filename + '_pred': thresh_binary
+                    filename + '_pred': thresh_binary,
+                filename + '_binary': binary
                 }
             else:
                 return {
                 filename + '_output': pred_canvas,
-                # filename + '_pred': thresh_binary
+                filename + '_pred': thresh_binary,
+                filename + '_binary': binary
             }
 
     def demo_visualize(self, image_path, output):
