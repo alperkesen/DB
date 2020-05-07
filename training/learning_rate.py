@@ -87,8 +87,8 @@ class PiecewiseConstantLearningRate(Configurable):
 
 
 class DecayLearningRate(Configurable):
-    lr = State(default=0.007)
-    epochs = State(default=1200)
+    lr = State(default=0.001)
+    epochs = State(default=100)
     factor = State(default=0.9)
 
     def __init__(self, **kwargs):
