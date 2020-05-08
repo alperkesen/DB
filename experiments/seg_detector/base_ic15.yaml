@@ -12,7 +12,7 @@ define:
     processes:
         - class: AugmentDetectionData
           augmenter_args:
-              - ['GammaContrast', [0.5, 2.0]]
+              # - ['GammaContrast', [0.5, 2.0]]
               # - {'cls': 'MultiplyAndAddToBrightness', 'mul': [0.5, 1.5], 'add': [-30, 30]}
               # - ['Fliplr', 0.5]
               - {'cls': 'Affine', 'rotate': [-10, 10]}
