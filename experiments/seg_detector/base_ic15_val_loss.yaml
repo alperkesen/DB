@@ -12,9 +12,9 @@ define:
     processes:
         - class: AugmentDetectionData
           augmenter_args:
-              - ['Fliplr', 0.5]
+              # - ['Fliplr', 0.5]
               # - {'cls': 'Affine', 'rotate': [-10, 10]}
-              # - ['Resize', [0.5, 3.0]]
+              - ['Resize', [0.5, 3.0]]
           only_resize: False
           keep_ratio: False
         - class: RandomCropData
