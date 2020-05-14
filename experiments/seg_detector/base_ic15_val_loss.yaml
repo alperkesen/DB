@@ -10,7 +10,7 @@ define:
     data_list:
         - './datasets/icdar2015/test_list.txt'
     processes:
-        # - class: AugmentDetectionData
+        - class: AugmentDetectionData
           augmenter_args:
               - ['Fliplr', 0.5]
               # - {'cls': 'Affine', 'rotate': [-10, 10]}
