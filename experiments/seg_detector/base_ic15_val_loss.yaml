@@ -11,12 +11,12 @@ define:
         - './datasets/icdar2015/test_list.txt'
     processes:
         # - class: AugmentDetectionData
-        #  augmenter_args:
-              # - ['Fliplr', 0.5]
+          augmenter_args:
+              - ['Fliplr', 0.5]
               # - {'cls': 'Affine', 'rotate': [-10, 10]}
               # - ['Resize', [0.5, 3.0]]
-        #  only_resize: False
-        #  keep_ratio: False
+          only_resize: False
+          keep_ratio: False
         - class: RandomCropData
           size: [640, 640]
           max_tries: 10
