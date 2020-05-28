@@ -42,7 +42,7 @@ class AugmentData(DataProcess):
             if self.only_resize:
                 data['image'] = self.resize_image(image)
             else:
-                data['image'] = aug.augment_image(image)
+                data['image'] = aug.augment_image(image.astype(np.uint8)).astype(np.float32)
             self.may_augment_annotation(aug, data, shape)
 
         filename = data.get('filename', data.get('data_id', ''))
